@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\PostController;
+use App\Http\Controllers\Web\V1\AuthController;
+use App\Http\Controllers\Web\V1\BlogController;
+use App\Http\Controllers\Web\V1\CategoryController;
+use App\Http\Controllers\Web\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,27 +18,22 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [AuthController::class, 'dashboard'])->name('dashboard');
-Route::get('/login', [AuthController::class, 'loginForm'])->name('login-form');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/register', [AuthController::class, 'registerForm'])->name('register-form');
-Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/register', [AuthController::class, 'register'])->name('register');
 
-// Route::prefix('/post')->name('post.')->group(function () {
-//     Route::get('/', [PostController::class, 'index'])->name('index');
-//     Route::get('/create', [PostController::class, 'create'])->name('create');
-//     Route::post('/create', [PostController::class, 'store'])->name('store');
-//     Route::get('/{post}', [PostController::class, 'show'])->name('show');
-//     Route::get('/edit/{post}', [PostController::class, 'edit'])->name('edit');
-//     Route::put('/edit/{post}', [PostController::class, 'update'])->name('update');
-//     Route::delete('/{post}', [PostController::class, 'destroy'])->name('destroy');
-// });
+Route::prefix('/user')->name('user.')->group(function () {
+    Route::get('/{user}', [UserController::class, 'show'])->name('show');
+});
 
-// Route::prefix('category')->name('category.')->group(function () {
-//     Route::get('/', [CategoryController::class, 'index'])->name('index');
-//     Route::get('/create', [CategoryController::class, 'create'])->name('create');
-//     Route::post('/create', [CategoryController::class, 'store'])->name('store');
-//     Route::get('/edit/{category}', [CategoryController::class, 'edit'])->name('edit');
-//     Route::put('/edit/{category}', [CategoryController::class, 'update'])->name('update');
-//     Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
-// });
+Route::prefix('/blog')->name('blog.')->group(function () {
+    Route::get('/', [BlogController::class, 'index'])->name('index');
+    Route::get('/create', [BlogController::class, 'create'])->name('create');
+    Route::get('/{blog}', [BlogController::class, 'show'])->name('show');
+    Route::get('/edit/{blog}', [BlogController::class, 'edit'])->name('edit');
+});
+
+Route::prefix('category')->name('category.')->group(function () {
+    Route::get('/', [CategoryController::class, 'index'])->name('index');
+    Route::get('/create', [CategoryController::class, 'create'])->name('create');
+    Route::get('/edit/{category}', [CategoryController::class, 'edit'])->name('edit');
+});

@@ -13,8 +13,7 @@ class UpdateCategoryRequest extends FormRequest
     {
         $user = $this->user();
 
-        return isset($user)
-            && $user->tokenCan('category:update');
+        return isset($user) && $user->tokenCan('category:update');
     }
 
     /**

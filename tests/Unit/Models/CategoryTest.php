@@ -17,7 +17,7 @@ class CategoryTest extends TestCase
     public function test_categories_table_has_expected_columns(): void
     {
         $this->assertTrue(Schema::hasColumns('categories', [
-            'id', 'name'
+            'id', 'name',
         ]), 1);
     }
 

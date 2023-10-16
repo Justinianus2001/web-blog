@@ -13,8 +13,7 @@ class DeleteCategoryRequest extends FormRequest
     {
         $user = $this->user();
 
-        return isset($user)
-            && $user->tokenCan('category:delete');
+        return isset($user) && $user->tokenCan('category:delete');
     }
 
     /**

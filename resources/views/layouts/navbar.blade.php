@@ -7,23 +7,44 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <div class="navbar-nav">
                 <a class="nav-link {{ Request::routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Dashboard</a>
-                <a class="nav-link {{ Request::routeIs('post.index') ? 'active' : '' }}" href="{{ route('post.index') }}">Blogs</a>
+                <a class="nav-link {{ Request::routeIs('blog.index') ? 'active' : '' }}" href="{{ route('blog.index') }}">Blogs</a>
                 <a class="nav-link {{ Request::routeIs('category.index') ? 'active' : '' }}" href="{{ route('category.index') }}">Categories</a>
             </div>
         </div>
         <span class="navbar-text">
-            @if (Auth::guest())
+            @auth
+                <img src="{{ asset('storage/' . auth('sanctum')->user()->avatar) }}" alt="User Avatar"
+                    height="24" width="24" style="border-radius: 50%">
+                Hello {{ auth('sanctum')->user()->name }},
+                <a href="{{ route('user.show', ['user' => auth('sanctum')->user()->id ]) }}"
+                    class="btn btn-outline-primary btn-sm">Profile</a>
+                <form action="" method="POST" id="form-logout" style="display: inline">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-primary btn-sm" style="color: #fff">Logout</button>
+                </form>
+            @else
                 <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">Login</a>
                 <a href="{{ route('register') }}" class="btn btn-outline-primary btn-sm">Register</a>
-            @else
-                Hello {{ Auth::user()->name }},
-                <a href="" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    Log out
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
-            @endif
+            @endauth
         </span>
     </div>
 </nav>
+<script>
+    $('#form-logout').on('submit', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: "{{ route('api.logout') }}",
+            type: "POST",
+            headers: {"Authorization": "Bearer " + localStorage.getItem('token')},
+            data: $(this).serialize(),
+            success: function (response) {
+                alert(response.message);
+                localStorage.removeItem('token');
+                window.location.href = "{{ route('dashboard') }}";
+            },
+            error: function (error) {
+                alert(error.responseJSON.message);
+            }
+        });
+    });
+</script>

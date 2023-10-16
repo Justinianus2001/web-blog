@@ -17,11 +17,11 @@ class AuthTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['*']
+            ['*'],
         );
 
         $response = $this->get('/api/user');
-        $response->assertStatus(200);
+        $response->assertOk();
     }
 
     public function test_register_return_successful(): void
@@ -64,11 +64,23 @@ class AuthTest extends TestCase
         ]);
     }
 
+    public function test_login_return_failed(): void
+    {
+        $response = $this->post('/api/v1/login', [
+            'email' => AppHelper::randEmail(),
+            'password' => 'password',
+        ]);
+
+        $response->assertJsonStructure([
+            'message',
+        ]);
+    }
+
     public function test_logout_return_successful(): void
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['*']
+            ['*'],
         );
 
         $response = $this->post('/api/v1/logout');

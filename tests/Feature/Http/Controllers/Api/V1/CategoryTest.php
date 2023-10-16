@@ -26,7 +26,7 @@ class CategoryTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['category:store']
+            ['category:store'],
         );
 
         $response = $this->post('/api/v1/category', [
@@ -47,7 +47,7 @@ class CategoryTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['category:update']
+            ['category:update'],
         );
 
         $category = Category::factory()->create();
@@ -62,7 +62,7 @@ class CategoryTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['category:delete']
+            ['category:delete'],
         );
 
         $category = Category::factory()->create();

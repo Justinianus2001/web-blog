@@ -17,7 +17,7 @@ class BlogTest extends TestCase
     public function test_blogs_table_has_expected_columns(): void
     {
         $this->assertTrue(Schema::hasColumns('blogs', [
-            'id', 'title', 'body', 'user_id', 'category_id'
+            'id', 'title', 'body', 'image', 'user_id', 'category_id',
         ]), 1);
     }
 

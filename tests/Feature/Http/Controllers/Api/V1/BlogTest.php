@@ -27,7 +27,7 @@ class BlogTest extends TestCase
     {
         Blog::factory()->count(10)->create();
 
-        $response = $this->get('/api/v1/blog/search/a?test=0');
+        $response = $this->get('/api/v1/blog/search?keyword=a&test=0');
         $response->assertOk();
     }
 
@@ -35,7 +35,7 @@ class BlogTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['blog:store']
+            ['blog:store'],
         );
 
         $response = $this->post('/api/v1/blog', [
@@ -51,7 +51,7 @@ class BlogTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['blog:store']
+            ['blog:store'],
         );
 
         $response = $this->post('/api/v1/blog/bulk', [
@@ -66,7 +66,7 @@ class BlogTest extends TestCase
                 'categoryId' => Category::factory()->create()->id,
             ],
         ]);
-        $response->assertOk();
+        $response->assertCreated();
     }
 
     public function test_blog_show_return_successful(): void
@@ -82,7 +82,7 @@ class BlogTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs(
             $user,
-            ['blog:update']
+            ['blog:update'],
         );
 
         $blog = Blog::factory()->create(['user_id' => $user->id]);
@@ -96,12 +96,31 @@ class BlogTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_blog_update_patch_return_successful(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs(
+            $user,
+            ['blog:update'],
+        );
+
+        $blog = Blog::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->patch('/api/v1/blog/' . $blog->id, [
+            'title' => AppHelper::randStr(),
+            'body' => AppHelper::randStr(),
+            'categoryId' => Category::factory()->create()->id,
+            'test' => false,
+        ]);
+        $response->assertOk();
+    }
+
     public function test_blog_delete_return_successful(): void
     {
         $user = User::factory()->create();
         Sanctum::actingAs(
             $user,
-            ['blog:delete']
+            ['blog:delete'],
         );
 
         $blog = Blog::factory()->create(['user_id' => $user->id]);

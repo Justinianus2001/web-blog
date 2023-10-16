@@ -1,2 +1,9 @@
 .docker/nginx.conf
+.env
+.gitattributes
+.gitignore
+.phpunit.result.cache
 /coverage
+/vendor
+LICENSE
+README.md

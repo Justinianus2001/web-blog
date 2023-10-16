@@ -4,7 +4,7 @@
         <div class="col-md-8 card">
             <div class="card-header">Login</div>
             <div class="card-body">
-                <form action="" method="POST">
+                <form action="" method="POST" id="form-login">
                     @csrf
                     <div class="form-group row">
                         <label for="email_address" class="col-md-4 col-form-label text-md-right">Email Address</label>
@@ -45,4 +45,24 @@
             </div>
         </div>
     </div>
+@endsection
+@section('scripts')
+    <script>
+        $('#form-login').on('submit', function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: "{{ route('api.login') }}",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function (response) {
+                    alert(response.message);
+                    localStorage.setItem('token', response.data.token);
+                    window.location.href = "{{ route('dashboard') }}";
+                },
+                error: function (error) {
+                    alert(error.responseJSON.message);
+                }
+            });
+        })
+    </script>
 @endsection

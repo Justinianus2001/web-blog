@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('body');
+            $table->string('image')->default('blogs/default_blog_image.png');
             $table->integer('user_id');
             $table->integer('category_id');
             $table->timestamps();

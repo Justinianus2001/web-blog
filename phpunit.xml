@@ -9,9 +9,7 @@
             <directory>tests/Unit</directory>
         </testsuite>
         <testsuite name="Feature">
-            <file>tests/Feature/Http/Controllers/Api/V1/CategoryTest.php</file>
-            <file>tests/Feature/Http/Controllers/Api/V1/BlogTest.php</file>
-            <file>tests/Feature/Http/Controllers/Api/V1/AuthTest.php</file>
+            <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
     <source>

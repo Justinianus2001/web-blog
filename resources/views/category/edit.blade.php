@@ -5,14 +5,14 @@
         <h1 class="display-4">Edit Category</h1>
         <p>Edit and submit this form to update a category</p>
         <hr>
-        <form action="" method="POST">
+        <form action="" method="POST" id="form-edit-category">
             @csrf
             @method('PUT')
             <div class="row">
                 <div class="control-group col-12">
                     <label for="name">Category Name</label>
-                    <input type="text" id="title" class="form-control" name="name"
-                        placeholder="Enter Category Name" value="{{ $category->name }}" required>
+                    <input type="text" id="name" class="form-control" name="name"
+                        placeholder="Enter Category Name" required>
                     @if ($errors->has('name'))
                         <span class="text-danger">{{ $errors->first('name') }}</span>
                     @endif
@@ -28,7 +28,7 @@
         </form>
         <div class="row mt-2">
             <div class="control-group col-12 text-center">
-                <form id="delete-frm" class="" action="{{ route('category.destroy', ['category' => $category]) }}" method="POST">
+                <form id="form-delete-category" class="" action="" method="POST">
                     @method('DELETE')
                     @csrf
                     <button class="btn btn-danger">Delete Category</button>
@@ -36,4 +36,50 @@
             </div>
         </div>
     </div>
+@endsection
+@section('scripts')
+    <script>
+        $.ajax({
+            url: "{{ route('api.category.show', ['category' => $category]) }}",
+            type: "GET",
+            success: function (response) {
+                $('#name').val(response.data.name);
+            },
+            error: function (error) {
+                alert(error.responseJSON.message)
+            }
+        });
+        $('#form-edit-category').on('submit', function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: "{{ route('api.category.update', ['category' => $category]) }}",
+                type: "POST",
+                headers: {"Authorization": "Bearer " + localStorage.getItem('token')},
+                data: $(this).serialize(),
+                success: function (response) {
+                    alert(response.message);
+                    window.location.href = "{{ route('category.index') }}";
+                },
+                error: function (error) {
+                    alert(error.responseJSON.message);
+                }
+            });
+        });
+        $('#form-delete-category').on('submit', function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: "{{ route('api.category.destroy', ['category' => $category]) }}",
+                type: "DELETE",
+                headers: {"Authorization": "Bearer " + localStorage.getItem('token')},
+                data: $(this).serialize(),
+                success: function (response) {
+                    alert(response.message);
+                    window.location.href = "{{ route('category.index') }}";
+                },
+                error: function (error) {
+                    alert(error.responseJSON.message);
+                }
+            });
+        });
+    </script>
 @endsection

@@ -4,7 +4,7 @@
         <div class="col-md-8 card">
             <div class="card-header">Register</div>
             <div class="card-body">
-                <form action="" method="POST">
+                <form action="" method="POST" id="form-register">
                     @csrf
                     <div class="form-group row">
                         <label for="name" class="col-md-4 col-form-label text-md-right">Name</label>
@@ -37,6 +37,16 @@
                     </div>
                     <br>
                     <div class="form-group row">
+                        <label for="password_confirmation" class="col-md-4 col-form-label text-md-right">Confirm Password</label>
+                        <div class="col-md-6">
+                            <input type="password" id="password_confirmation" class="form-control" name="password_confirmation" required>
+                            @if ($errors->has('password_confirmation'))
+                                <span class="text-danger">{{ $errors->first('password_confirmation') }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-group row">
                         <div class="col-md-6 offset-md-4">
                             <div class="checkbox">
                                 <label>
@@ -55,4 +65,24 @@
             </div>
         </div>
     </div>
+@endsection
+@section('scripts')
+    <script>
+        $('#form-register').on('submit', function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: "{{ route('api.register') }}",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function (response) {
+                    alert(response.message);
+                    localStorage.setItem('token', response.data.token);
+                    window.location.href = "{{ route('dashboard') }}";
+                },
+                error: function (error) {
+                    alert(error.responseJSON.message);
+                }
+            });
+        })
+    </script>
 @endsection

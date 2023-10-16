@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Filters\V1\BlogFilter;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\BaseController;
 use App\Http\Requests\BulkStoreBlogRequest;
 use App\Http\Requests\DeleteBlogRequest;
 use App\Http\Requests\StoreBlogRequest;
@@ -12,31 +12,35 @@ use App\Http\Resources\V1\BlogCollection;
 use App\Http\Resources\V1\BlogResource;
 use App\Models\Blog;
 use Elastic\Elasticsearch\ClientBuilder;
-use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class BlogController extends Controller
+class BlogController extends BaseController
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): BlogCollection
+    public function index(Request $request): JsonResponse
     {
         $query = (new BlogFilter())->transform($request);
-        $blogs = Blog::where($query)->with('category');
+        $blogs = Blog::where($query)->with(['user', 'category'])
+            ->paginate(5)->appends($request->query());
 
-        return new BlogCollection($blogs->paginate(5)->appends($request->query()));
+        return $this->sendResponse(
+            new BlogCollection($blogs),
+            'Blogs retrieved successfully');
     }
 
     /**
      * Search a listing of the resource.
      */
-    public function search(Request $request, string $keyword)
+    public function search(Request $request)
     {
         $elastic = $request->test ?? true;
+        $keyword = $request->keyword;
+        $ids = [];
 
-        if ($elastic) {
+        if ($elastic && isset($keyword)) {
             $client = ClientBuilder::create()
                 ->setHosts([env('ELASTICSEARCH_HOST')])
                 ->build();
@@ -53,22 +57,26 @@ class BlogController extends Controller
             ];
             $response = $client->search($params);
 
-            return $response->asArray();
+            foreach ($response['hits']['hits'] as $hit) {
+                $ids[] = $hit['_id'];
+            }
         }
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): void
-    {
-        //
+        $blogs = Blog::whereIn('id', $ids)->with(['user', 'category'])
+            ->paginate(5)->appends($request->query())
+            ->sortBy(function($model) use ($ids) {
+                return array_search($model->getKey(), $ids);
+            });
+
+        return $this->sendResponse(
+            new BlogCollection($blogs),
+            'Blogs retrieved successfully');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreBlogRequest $request): BlogResource
+    public function store(StoreBlogRequest $request): JsonResponse
     {
         $blog = Blog::create($request->all());
 
@@ -90,13 +98,15 @@ class BlogController extends Controller
             $client->index($params);
         }
 
-        return new BlogResource($blog);
+        return $this->sendResponse(
+            new BlogResource($blog),
+            'Blog created successfully', 201);
     }
 
     /**
      * Store some newly created resource in storage.
      */
-    public function bulkStore(BulkStoreBlogRequest $request): void
+    public function bulkStore(BulkStoreBlogRequest $request): JsonResponse
     {
         $bulk = collect($request->all())->map(function ($arr, $key) {
             return [
@@ -108,28 +118,24 @@ class BlogController extends Controller
         });
 
         Blog::insert($bulk->toArray());
+
+        return $this->sendResponse([], 'Blog created successfully', 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Blog $blog): BlogResource
+    public function show(Blog $blog): JsonResponse
     {
-        return new BlogResource($blog->loadMissing('category'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Blog $blog): void
-    {
-        //
+        return $this->sendResponse(
+            new BlogResource($blog->loadMissing('category')),
+            'Blog retrieved successfully');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateBlogRequest $request, Blog $blog): BlogResource
+    public function update(UpdateBlogRequest $request, Blog $blog): JsonResponse
     {
         $blog->update($request->all());
 
@@ -153,13 +159,15 @@ class BlogController extends Controller
             $client->update($params);
         }
 
-        return new BlogResource($blog->loadMissing('category'));
+        return $this->sendResponse(
+            new BlogResource($blog->loadMissing('category')),
+            'Blog updated successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DeleteBlogRequest $request, Blog $blog): void
+    public function destroy(DeleteBlogRequest $request, Blog $blog): JsonResponse
     {
         $elastic = $request->test ?? true;
 
@@ -177,5 +185,7 @@ class BlogController extends Controller
         }
 
         $blog->delete();
+
+        return $this->sendResponse([], 'Blog deleted successfully');
     }
 }
